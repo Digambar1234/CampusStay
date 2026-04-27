@@ -1,0 +1,3 @@
+export default function TermsPage() {
+  return <main className="mx-auto max-w-3xl px-4 py-12"><h1 className="text-3xl font-semibold">Terms of Service</h1><div className="mt-6 grid gap-4 text-stone-700"><p>CampusStay is a platform connecting students and PG owners near LPU. We verify listings to the best available process, but room availability, final rent, and tenancy terms must be confirmed directly with the owner.</p><p>Credits unlock owner contact details and do not guarantee booking or availability.</p><p>Misuse, fake listings, abusive content, or attempts to bypass platform protections may lead to account suspension.</p></div></main>;
+}

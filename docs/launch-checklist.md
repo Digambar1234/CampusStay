@@ -1,0 +1,26 @@
+# Launch Checklist
+
+- Domain connected
+- SSL enabled
+- Production `DATABASE_URL` set
+- Migrations applied
+- Admin seeded
+- `JWT_SECRET_KEY` rotated to strong secret
+- `FRONTEND_ORIGINS` set to exact domains
+- Cloudinary keys set
+- Razorpay test keys verified
+- Razorpay live keys set when approved
+- Vercel frontend env set
+- Render/Railway backend env set
+- First 20-25 PGs onboarded
+- Listings physically/operationally verified
+- Payment tested
+- Contact unlock tested
+- Reviews tested
+- Reports tested
+- Featured listing tested
+- Legal pages reviewed
+- Mobile UI tested
+- `/ready` checked
+- Admin analytics checked
+- Backup policy confirmed
