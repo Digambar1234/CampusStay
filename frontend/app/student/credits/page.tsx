@@ -93,6 +93,7 @@ export default function StudentCreditsPage() {
         order_id: order.order_id,
         prefill: { name: user?.full_name, email: user?.email, contact: user?.phone ?? undefined },
         theme: { color: "#047857" },
+        method: { upi: true, card: true, netbanking: true, wallet: true, paylater: true },
         retry: { enabled: false },
         modal: { ondismiss: () => { restoreBrowserAlert(); setIsBuying(false); setMessage("Payment cancelled."); } },
         handler: async (response: RazorpaySuccessResponse) => {

@@ -34,6 +34,13 @@ type RazorpayOptions = {
   theme?: {
     color?: string;
   };
+  method?: {
+    card?: boolean;
+    netbanking?: boolean;
+    wallet?: boolean;
+    upi?: boolean;
+    paylater?: boolean;
+  };
   retry?: {
     enabled?: boolean;
     max_count?: number;
