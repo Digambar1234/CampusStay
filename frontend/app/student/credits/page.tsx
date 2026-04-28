@@ -13,7 +13,7 @@ import type { CreditTransaction, CreditWallet } from "@/lib/types";
 
 export default function StudentCreditsPage() {
   const { user } = useAuth();
-  const isRazorpayTestMode = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith("rzp_test_") ?? false;
+  const isTestCreditPurchaseEnabled = process.env.NEXT_PUBLIC_ENABLE_TEST_CREDIT_PURCHASE === "true";
   const [wallet, setWallet] = useState<CreditWallet | null>(null);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +59,7 @@ export default function StudentCreditsPage() {
     setMessage(null);
     setIsBuying(true);
     try {
-      if (isRazorpayTestMode) {
+      if (isTestCreditPurchaseEnabled) {
         const result = await createTestCreditPurchase();
         await load();
         setMessage(`Test payment complete. Added ${result.credits_added} credits.`);
@@ -125,7 +125,7 @@ export default function StudentCreditsPage() {
         <p className="mt-2 text-stone-600">1 credit = 1 PG owner contact unlock. Rs. 10 = 10 credits.</p>
         {error ? <div className="mt-4"><ErrorState message={error} /></div> : null}
         {message ? <p className="mt-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">{message}</p> : null}
-        {isRazorpayTestMode ? (
+        {isTestCreditPurchaseEnabled ? (
           <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
             <p className="font-medium">Razorpay test mode</p>
             <p className="mt-2">The Buy button adds test credits instantly. No real money is charged.</p>

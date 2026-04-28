@@ -25,6 +25,7 @@ class Settings(BaseSettings):
 
     razorpay_key_id: str | None = Field(default=None, alias="RAZORPAY_KEY_ID")
     razorpay_key_secret: str | None = Field(default=None, alias="RAZORPAY_KEY_SECRET")
+    allow_test_credit_purchase: bool = Field(default=False, alias="ALLOW_TEST_CREDIT_PURCHASE")
     credit_pack_price_rupees: int = Field(default=10, alias="CREDIT_PACK_PRICE_RUPEES")
     credit_pack_amount: int = Field(default=10, alias="CREDIT_PACK_AMOUNT")
 

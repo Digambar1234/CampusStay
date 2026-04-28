@@ -272,7 +272,12 @@ def create_test_credit_purchase(
     db: Session = Depends(get_db),
 ) -> TestCreditPurchaseResponse:
     settings = get_settings()
-    if not settings.razorpay_key_id or not settings.razorpay_key_id.startswith("rzp_test_"):
+    if (
+        settings.is_production
+        or not settings.allow_test_credit_purchase
+        or not settings.razorpay_key_id
+        or not settings.razorpay_key_id.startswith("rzp_test_")
+    ):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Test credit purchase is not enabled.")
 
     wallet = db.scalar(select(CreditWallet).where(CreditWallet.student_id == current_user.id).with_for_update())
