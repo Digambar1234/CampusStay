@@ -2,13 +2,16 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { apiRequest, clearStoredToken, getStoredToken, login, register, setStoredToken } from "@/lib/api-client";
+import { apiRequest, clearStoredToken, getStoredToken, login, register, setStoredToken, startLoginOtp, verifyLoginOtp } from "@/lib/api-client";
+import type { LoginOtpStartResponse } from "@/lib/types";
 import type { AuthUser, UserRole } from "@/lib/types";
 
 type AuthContextValue = {
   user: AuthUser | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<AuthUser>;
+  startOtpSignIn: (email: string, password: string) => Promise<LoginOtpStartResponse>;
+  verifyOtpSignIn: (challengeId: string, otp: string) => Promise<AuthUser>;
   signUp: (input: {
     full_name: string;
     email: string;
@@ -57,6 +60,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading,
       signIn: async (email, password) => {
         const response = await login(email, password);
+        setStoredToken(response.access_token);
+        setUser(response.user);
+        return response.user;
+      },
+      startOtpSignIn: (email, password) => startLoginOtp(email, password),
+      verifyOtpSignIn: async (challengeId, otp) => {
+        const response = await verifyLoginOtp(challengeId, otp);
         setStoredToken(response.access_token);
         setUser(response.user);
         return response.user;

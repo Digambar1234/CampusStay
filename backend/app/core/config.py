@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     allow_test_credit_purchase: bool = Field(default=False, alias="ALLOW_TEST_CREDIT_PURCHASE")
     credit_pack_price_rupees: int = Field(default=10, alias="CREDIT_PACK_PRICE_RUPEES")
     credit_pack_amount: int = Field(default=10, alias="CREDIT_PACK_AMOUNT")
+    login_otp_ttl_minutes: int = Field(default=5, alias="LOGIN_OTP_TTL_MINUTES")
+    sms_provider: str | None = Field(default=None, alias="SMS_PROVIDER")
+    fast2sms_api_key: str | None = Field(default=None, alias="FAST2SMS_API_KEY")
 
     @property
     def allowed_origins(self) -> list[str]:

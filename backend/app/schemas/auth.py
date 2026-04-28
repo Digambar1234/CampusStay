@@ -17,6 +17,23 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class LoginOtpStartRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class LoginOtpStartResponse(BaseModel):
+    challenge_id: str
+    phone_hint: str
+    expires_in_seconds: int
+    dev_otp: str | None = None
+
+
+class LoginOtpVerifyRequest(BaseModel):
+    challenge_id: str
+    otp: str = Field(min_length=4, max_length=10)
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

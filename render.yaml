@@ -27,3 +27,9 @@ services:
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
+      - key: LOGIN_OTP_TTL_MINUTES
+        value: 5
+      - key: SMS_PROVIDER
+        sync: false
+      - key: FAST2SMS_API_KEY
+        sync: false

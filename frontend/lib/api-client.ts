@@ -27,6 +27,7 @@ import type {
   TopPG,
   AuditLog,
   ReadyResponse,
+  LoginOtpStartResponse,
 } from "@/lib/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -85,6 +86,22 @@ export function login(email: string, password: string) {
     method: "POST",
     auth: false,
     body: JSON.stringify({ email, password }),
+  });
+}
+
+export function startLoginOtp(email: string, password: string) {
+  return apiRequest<LoginOtpStartResponse>("/api/v1/auth/login/start", {
+    method: "POST",
+    auth: false,
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function verifyLoginOtp(challenge_id: string, otp: string) {
+  return apiRequest<AuthResponse>("/api/v1/auth/login/verify-otp", {
+    method: "POST",
+    auth: false,
+    body: JSON.stringify({ challenge_id, otp }),
   });
 }
 
