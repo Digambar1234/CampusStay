@@ -34,6 +34,10 @@ type RazorpayOptions = {
   theme?: {
     color?: string;
   };
+  retry?: {
+    enabled?: boolean;
+    max_count?: number;
+  };
   modal?: {
     ondismiss?: () => void;
   };
@@ -42,7 +46,7 @@ type RazorpayOptions = {
 declare global {
   interface Window {
     Razorpay?: new (options: RazorpayOptions) => {
-      on: (event: "payment.failed", callback: (response: RazorpayFailureResponse) => void) => void;
+      on: (event: "payment.failed", callback: (response?: RazorpayFailureResponse) => void) => void;
       open: () => void;
     };
   }

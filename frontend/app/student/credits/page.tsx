@@ -27,12 +27,18 @@ export default function StudentCreditsPage() {
 
   useEffect(() => { load().catch((err) => setError(err instanceof Error ? err.message : "Could not load credits.")); }, []);
 
-  async function handlePaymentFailure(response: RazorpayFailureResponse) {
-    const orderId = response.error?.metadata?.order_id;
-    const paymentId = response.error?.metadata?.payment_id;
-    const reason = response.error?.description ?? response.error?.reason ?? "Payment failed.";
+  async function handlePaymentFailure(
+    response?: RazorpayFailureResponse,
+    fallbackOrderId?: string,
+    onSettled?: () => void,
+  ) {
+    const orderId = response?.error?.metadata?.order_id ?? fallbackOrderId;
+    const paymentId = response?.error?.metadata?.payment_id;
+    const reason = response?.error?.description ?? response?.error?.reason ?? "Payment failed. Your card was not charged.";
 
+    onSettled?.();
     setIsBuying(false);
+    setMessage(null);
     setError(reason);
 
     if (!orderId) return;
@@ -55,6 +61,20 @@ export default function StudentCreditsPage() {
       const loaded = await loadRazorpayScript();
       if (!loaded || !window.Razorpay) throw new Error("Could not load Razorpay Checkout.");
       const order = await createCreditOrder();
+      const originalAlert = window.alert.bind(window);
+      const restoreBrowserAlert = () => {
+        window.alert = originalAlert;
+      };
+      window.alert = (message?: string) => {
+        const text = String(message ?? "");
+        if (text.includes("Payment Failed") || text.includes("Oops! Something went wrong")) {
+          setIsBuying(false);
+          setMessage(null);
+          setError("Payment failed. Your card was not charged. Please try again.");
+          return;
+        }
+        originalAlert(message);
+      };
       const checkout = new window.Razorpay({
         key: order.razorpay_key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: order.amount_paise,
@@ -64,9 +84,11 @@ export default function StudentCreditsPage() {
         order_id: order.order_id,
         prefill: { name: user?.full_name, email: user?.email, contact: user?.phone ?? undefined },
         theme: { color: "#047857" },
-        modal: { ondismiss: () => { setIsBuying(false); setMessage("Payment cancelled."); } },
+        retry: { enabled: false },
+        modal: { ondismiss: () => { restoreBrowserAlert(); setIsBuying(false); setMessage("Payment cancelled."); } },
         handler: async (response: RazorpaySuccessResponse) => {
           try {
+            restoreBrowserAlert();
             const verified = await verifyCreditPayment(response);
             await load();
             setMessage(verified.already_verified ? "Payment was already verified." : `Payment verified. Added ${verified.credits_added} credits.`);
@@ -77,7 +99,9 @@ export default function StudentCreditsPage() {
           }
         },
       });
-      checkout.on("payment.failed", handlePaymentFailure);
+      checkout.on("payment.failed", (response) => {
+        void handlePaymentFailure(response, order.order_id, restoreBrowserAlert);
+      });
       checkout.open();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start payment.");
