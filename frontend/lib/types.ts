@@ -17,13 +17,6 @@ export type AuthResponse = {
   user: AuthUser;
 };
 
-export type LoginOtpStartResponse = {
-  challenge_id: string;
-  phone_hint: string;
-  expires_in_seconds: number;
-  dev_otp?: string | null;
-};
-
 export type ListingStatus = "draft" | "pending_review" | "approved" | "rejected" | "suspended";
 export type GenderAllowed = "boys" | "girls" | "co_living";
 export type RoomType = "single" | "double_sharing" | "triple_sharing" | "four_sharing" | "dormitory";

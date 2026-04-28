@@ -19,7 +19,6 @@ from app.models.enums import (
 )
 from app.models.featured_listing import FeaturedListing
 from app.models.listing_view import ListingView
-from app.models.login_otp import LoginOtp
 from app.models.payment import Payment
 from app.models.pg_listing import PGListing
 from app.models.pg_photo import PGPhoto
@@ -42,7 +41,6 @@ __all__ = [
     "ImageType",
     "ListingStatus",
     "ListingView",
-    "LoginOtp",
     "Payment",
     "PaymentProvider",
     "PaymentStatus",
