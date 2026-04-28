@@ -267,6 +267,12 @@ export function markCreditPaymentFailed(input: {
   });
 }
 
+export function createTestCreditPurchase() {
+  return apiRequest<{ payment_status: "paid"; wallet_balance: number; credits_added: number }>("/api/v1/credits/test-purchase", {
+    method: "POST",
+  });
+}
+
 export function unlockContact(pgId: string) {
   return apiRequest<UnlockContactResponse>(`/api/v1/credits/unlock-contact/${pgId}`, { method: "POST" });
 }

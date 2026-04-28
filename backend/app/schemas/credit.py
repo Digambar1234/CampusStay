@@ -97,3 +97,9 @@ class MarkPaymentFailedRequest(BaseModel):
 
 class MarkPaymentFailedResponse(BaseModel):
     payment_status: PaymentStatus
+
+
+class TestCreditPurchaseResponse(BaseModel):
+    payment_status: PaymentStatus
+    wallet_balance: int
+    credits_added: int

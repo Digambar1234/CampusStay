@@ -7,7 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { ErrorState, LoadingState } from "@/components/pg/state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createCreditOrder, getCreditTransactions, getWallet, markCreditPaymentFailed, verifyCreditPayment } from "@/lib/api-client";
+import { createCreditOrder, createTestCreditPurchase, getCreditTransactions, getWallet, markCreditPaymentFailed, verifyCreditPayment } from "@/lib/api-client";
 import { loadRazorpayScript, type RazorpayFailureResponse, type RazorpaySuccessResponse } from "@/lib/razorpay";
 import type { CreditTransaction, CreditWallet } from "@/lib/types";
 
@@ -59,6 +59,14 @@ export default function StudentCreditsPage() {
     setMessage(null);
     setIsBuying(true);
     try {
+      if (isRazorpayTestMode) {
+        const result = await createTestCreditPurchase();
+        await load();
+        setMessage(`Test payment complete. Added ${result.credits_added} credits.`);
+        setIsBuying(false);
+        return;
+      }
+
       const loaded = await loadRazorpayScript();
       if (!loaded || !window.Razorpay) throw new Error("Could not load Razorpay Checkout.");
       const order = await createCreditOrder();
@@ -120,8 +128,8 @@ export default function StudentCreditsPage() {
         {isRazorpayTestMode ? (
           <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
             <p className="font-medium">Razorpay test mode</p>
-            <p className="mt-2">Use card 4111 1111 1111 1111, any future expiry, any CVV, then enter an OTP with 4 to 10 digits.</p>
-            <p className="mt-1">For UPI, use success@razorpay.</p>
+            <p className="mt-2">The Buy button adds test credits instantly. No real money is charged.</p>
+            <p className="mt-1">Switch to live Razorpay keys when you are ready to accept real payments.</p>
           </div>
         ) : null}
         {!wallet ? <LoadingState /> : (

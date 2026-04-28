@@ -18,6 +18,7 @@ from app.schemas.credit import (
     CreditWalletResponse,
     MarkPaymentFailedRequest,
     MarkPaymentFailedResponse,
+    TestCreditPurchaseResponse,
     UnlockContactResponse,
     UnlockedContactResponse,
     UnlockStatusResponse,
@@ -260,6 +261,49 @@ def create_credit_order(
         amount_paise=amount_paise,
         credits=credits,
         razorpay_key_id=settings.razorpay_key_id or "",
+    )
+
+
+@router.post("/test-purchase", response_model=TestCreditPurchaseResponse)
+@limiter.limit("5/minute")
+def create_test_credit_purchase(
+    request: Request,
+    current_user: User = Depends(require_roles(Role.STUDENT)),
+    db: Session = Depends(get_db),
+) -> TestCreditPurchaseResponse:
+    settings = get_settings()
+    if not settings.razorpay_key_id or not settings.razorpay_key_id.startswith("rzp_test_"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Test credit purchase is not enabled.")
+
+    wallet = db.scalar(select(CreditWallet).where(CreditWallet.student_id == current_user.id).with_for_update())
+    if wallet is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Credit wallet not found.")
+
+    payment = Payment(
+        student_id=current_user.id,
+        provider=PaymentProvider.RAZORPAY,
+        provider_order_id=f"test_order_{uuid.uuid4().hex}",
+        provider_payment_id=f"test_pay_{uuid.uuid4().hex}",
+        amount_rupees=settings.credit_pack_price_rupees,
+        credits_purchased=settings.credit_pack_amount,
+        status=PaymentStatus.PAID,
+    )
+    wallet.balance += settings.credit_pack_amount
+    db.add(payment)
+    db.add(
+        CreditTransaction(
+            student_id=current_user.id,
+            type=ContactUnlockTransactionType.PURCHASE,
+            amount=settings.credit_pack_amount,
+            reason=f"Test purchase: {settings.credit_pack_amount} credits",
+        )
+    )
+    db.commit()
+    db.refresh(wallet)
+    return TestCreditPurchaseResponse(
+        payment_status=PaymentStatus.PAID,
+        wallet_balance=wallet.balance,
+        credits_added=settings.credit_pack_amount,
     )
 
 
