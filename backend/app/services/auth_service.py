@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -19,6 +20,7 @@ from app.utils.phone import normalize_indian_phone
 PUBLIC_REGISTRATION_ROLES = {Role.STUDENT, Role.PG_OWNER}
 SIGNUP_BONUS_CREDITS = 10
 OTP_ATTEMPT_LIMIT = 5
+logger = logging.getLogger(__name__)
 
 
 def serialize_user(user: User) -> UserResponse:
@@ -117,6 +119,14 @@ def start_password_otp_login(db: Session, payload: LoginOtpStartRequest) -> Logi
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account is inactive.")
     if not user.phone:
+        settings = get_settings()
+        logger.error(
+            "login_otp_sms_failure reason=user_mobile_missing sms_provider=%s fast2sms_api_key_present=%s user_has_mobile=%s target_mobile=%s",
+            settings.sms_provider or "",
+            bool(settings.fast2sms_api_key),
+            False,
+            "missing",
+        )
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No mobile number is linked to this account.")
 
     code = f"{secrets.randbelow(900000) + 100000}"
