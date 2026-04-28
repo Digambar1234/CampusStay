@@ -13,6 +13,7 @@ import type { CreditTransaction, CreditWallet } from "@/lib/types";
 
 export default function StudentCreditsPage() {
   const { user } = useAuth();
+  const isRazorpayTestMode = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith("rzp_test_") ?? false;
   const [wallet, setWallet] = useState<CreditWallet | null>(null);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +117,13 @@ export default function StudentCreditsPage() {
         <p className="mt-2 text-stone-600">1 credit = 1 PG owner contact unlock. Rs. 10 = 10 credits.</p>
         {error ? <div className="mt-4"><ErrorState message={error} /></div> : null}
         {message ? <p className="mt-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">{message}</p> : null}
+        {isRazorpayTestMode ? (
+          <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+            <p className="font-medium">Razorpay test mode</p>
+            <p className="mt-2">Use card 4111 1111 1111 1111, any future expiry, any CVV, then enter an OTP with 4 to 10 digits.</p>
+            <p className="mt-1">For UPI, use success@razorpay.</p>
+          </div>
+        ) : null}
         {!wallet ? <LoadingState /> : (
           <div className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
             <Card>
