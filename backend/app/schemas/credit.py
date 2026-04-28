@@ -87,3 +87,13 @@ class VerifyPaymentResponse(BaseModel):
     wallet_balance: int
     credits_added: int
     already_verified: bool = False
+
+
+class MarkPaymentFailedRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str | None = None
+    reason: str | None = None
+
+
+class MarkPaymentFailedResponse(BaseModel):
+    payment_status: PaymentStatus

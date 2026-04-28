@@ -7,8 +7,8 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { ErrorState, LoadingState } from "@/components/pg/state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createCreditOrder, getCreditTransactions, getWallet, verifyCreditPayment } from "@/lib/api-client";
-import { loadRazorpayScript, type RazorpaySuccessResponse } from "@/lib/razorpay";
+import { createCreditOrder, getCreditTransactions, getWallet, markCreditPaymentFailed, verifyCreditPayment } from "@/lib/api-client";
+import { loadRazorpayScript, type RazorpayFailureResponse, type RazorpaySuccessResponse } from "@/lib/razorpay";
 import type { CreditTransaction, CreditWallet } from "@/lib/types";
 
 export default function StudentCreditsPage() {
@@ -26,6 +26,26 @@ export default function StudentCreditsPage() {
   }
 
   useEffect(() => { load().catch((err) => setError(err instanceof Error ? err.message : "Could not load credits.")); }, []);
+
+  async function handlePaymentFailure(response: RazorpayFailureResponse) {
+    const orderId = response.error?.metadata?.order_id;
+    const paymentId = response.error?.metadata?.payment_id;
+    const reason = response.error?.description ?? response.error?.reason ?? "Payment failed.";
+
+    setIsBuying(false);
+    setError(reason);
+
+    if (!orderId) return;
+    try {
+      await markCreditPaymentFailed({
+        razorpay_order_id: orderId,
+        razorpay_payment_id: paymentId,
+        reason,
+      });
+    } catch {
+      // The UI should stay on the normal failure message even if status logging fails.
+    }
+  }
 
   async function buyCredits() {
     setError(null);
@@ -57,6 +77,7 @@ export default function StudentCreditsPage() {
           }
         },
       });
+      checkout.on("payment.failed", handlePaymentFailure);
       checkout.open();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start payment.");

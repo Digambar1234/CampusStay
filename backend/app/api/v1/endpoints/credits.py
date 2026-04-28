@@ -16,6 +16,8 @@ from app.schemas.credit import (
     CreditTransactionListResponse,
     CreditTransactionResponse,
     CreditWalletResponse,
+    MarkPaymentFailedRequest,
+    MarkPaymentFailedResponse,
     UnlockContactResponse,
     UnlockedContactResponse,
     UnlockStatusResponse,
@@ -259,6 +261,31 @@ def create_credit_order(
         credits=credits,
         razorpay_key_id=settings.razorpay_key_id or "",
     )
+
+
+@router.post("/mark-payment-failed", response_model=MarkPaymentFailedResponse)
+@limiter.limit("10/minute")
+def mark_credit_payment_failed(
+    request: Request,
+    payload: MarkPaymentFailedRequest,
+    current_user: User = Depends(require_roles(Role.STUDENT)),
+    db: Session = Depends(get_db),
+) -> MarkPaymentFailedResponse:
+    payment = db.scalar(
+        select(Payment)
+        .where(Payment.provider_order_id == payload.razorpay_order_id, Payment.student_id == current_user.id)
+        .with_for_update()
+    )
+    if payment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment order not found.")
+
+    if payment.status != PaymentStatus.PAID:
+        payment.status = PaymentStatus.FAILED
+        if payload.razorpay_payment_id:
+            payment.provider_payment_id = payload.razorpay_payment_id
+        db.commit()
+
+    return MarkPaymentFailedResponse(payment_status=payment.status)
 
 
 @router.post("/verify-payment", response_model=VerifyPaymentResponse)

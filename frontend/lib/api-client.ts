@@ -256,6 +256,17 @@ export function verifyCreditPayment(input: {
   });
 }
 
+export function markCreditPaymentFailed(input: {
+  razorpay_order_id: string;
+  razorpay_payment_id?: string;
+  reason?: string;
+}) {
+  return apiRequest<{ payment_status: "created" | "paid" | "failed" | "refunded" }>("/api/v1/credits/mark-payment-failed", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 export function unlockContact(pgId: string) {
   return apiRequest<UnlockContactResponse>(`/api/v1/credits/unlock-contact/${pgId}`, { method: "POST" });
 }
